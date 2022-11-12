@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!--
+  Copyright (C) fastman92 <fastman92@gmail.com>, website: http://fastman92.com
+  Licensed under the MIT License, see LICENSE at top level directory.
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ImportGroup Label="PropertySheets" />
+	<PropertyGroup>
+	
+	<PlatformShortName Condition="'$(SolutionPlatform)'=='ANDROID_ARMEABI'">armv5-te</PlatformShortName>
+	<ClangTarget Condition="'$(SolutionPlatform)'=='ANDROID_ARMEABI'">armv5te-none-linux-androideabi</ClangTarget>
+	<TargetArchAbi Condition="'$(SolutionPlatform)'=='ANDROID_ARMEABI'">armeabi</TargetArchAbi>
+	
+	
+	<AndroidPrebuiltLibraryPath>$(ToolchainPrebuiltPath)\$(ToolchainName)\lib</AndroidPrebuiltLibraryPath>
+	<AndroidPrebuiltLibraryPath Condition="'$(SolutionPlatformPointerSizeInBits)'=='64'">$(AndroidPrebuiltLibraryPath)64</AndroidPrebuiltLibraryPath>
+	
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(TargetArchAbi)'!=''">$(MultiPlatformSupportCommonPreprocessorDefinitions);TARGET_ARCH_ABI=$(TargetArchAbi)</MultiPlatformSupportCommonPreprocessorDefinitions>
+	
+  </PropertyGroup>
+ 
+</Project>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!--
+  Copyright (C) fastman92 <fastman92@gmail.com>, website: http://fastman92.com
+  Licensed under the MIT License, see LICENSE at top level directory.
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ImportGroup Label="PropertySheets" />
+	<PropertyGroup Label="UserMacros">
+	
+	<SolutionPlatformForce Condition="'$(SolutionPlatformForce)'==''">$(SolutionPlatform)</SolutionPlatformForce>
+	<SolutionPlatformForce Condition="'$(SolutionPlatformForce)'==''">UNKNOWN_SOLUTION_PLATFORM</SolutionPlatformForce>
+	
+	<!-- -->
+	<MultiPlatformSupportCommonPreprocessorDefinitions>SOLUTION_PLATFORM=$(SolutionPlatformForce);SOLUTION_PLATFORM_STR="$(SolutionPlatformForce)"</MultiPlatformSupportCommonPreprocessorDefinitions>
+	
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformForce)'=='WIN_X86'">$(MultiPlatformSupportCommonPreprocessorDefinitions);WIN32</MultiPlatformSupportCommonPreprocessorDefinitions>
+	
+	<!-- system -->
+	<SolutionPlatformSystem>$(SolutionPlatformForce.Substring(0, $(SolutionPlatformForce.IndexOf('_'))))</SolutionPlatformSystem>
+	
+	
+	<MultiPlatformSupportCommonPreprocessorDefinitions>$(MultiPlatformSupportCommonPreprocessorDefinitions);IS_PLATFORM_$(SolutionPlatformSystem);</MultiPlatformSupportCommonPreprocessorDefinitions>
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformSystem)'=='WIN'">$(MultiPlatformSupportCommonPreprocessorDefinitions);_WINDOWS</MultiPlatformSupportCommonPreprocessorDefinitions>
+
+
+	<!-- CPU architecture -->
+	
+	<SolutionPlatformABI>$(SolutionPlatformForce.Substring($([MSBuild]::Add($(SolutionPlatformForce.IndexOf('_')), 1))))</SolutionPlatformABI>
+	
+	<SolutionPlatformArchitecture Condition="'$(SolutionPlatformABI)'=='ARMEABI' Or '$(SolutionPlatformABI)'=='ARMEABI_V7A'">ARM32</SolutionPlatformArchitecture>
+	<SolutionPlatformArchitecture Condition="'$(SolutionPlatformABI)'=='ARM64_V8A'">ARM64</SolutionPlatformArchitecture>
+	<SolutionPlatformArchitecture Condition="'$(SolutionPlatformArchitecture)'==''">$(SolutionPlatformABI)</SolutionPlatformArchitecture>
+	
+	
+	<MultiPlatformSupportCommonPreprocessorDefinitions>$(MultiPlatformSupportCommonPreprocessorDefinitions);IS_ARCHITECTURE_$(SolutionPlatformArchitecture)</MultiPlatformSupportCommonPreprocessorDefinitions>
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformArchitecture)'=='X86'">$(MultiPlatformSupportCommonPreprocessorDefinitions);CURRENT_PROCESSOR_INSTRUCTION_SET=INSTRUCTION_SET_X86</MultiPlatformSupportCommonPreprocessorDefinitions>
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformArchitecture)'=='X64'">$(MultiPlatformSupportCommonPreprocessorDefinitions);CURRENT_PROCESSOR_INSTRUCTION_SET=INSTRUCTION_SET_X64</MultiPlatformSupportCommonPreprocessorDefinitions>
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformArchitecture)'=='ARM32'">$(MultiPlatformSupportCommonPreprocessorDefinitions);CURRENT_PROCESSOR_INSTRUCTION_SET=INSTRUCTION_SET_UNDEFINED</MultiPlatformSupportCommonPreprocessorDefinitions>
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformArchitecture)'=='ARM64'">$(MultiPlatformSupportCommonPreprocessorDefinitions);CURRENT_PROCESSOR_INSTRUCTION_SET=INSTRUCTION_SET_ARM64</MultiPlatformSupportCommonPreprocessorDefinitions>
+	
+	<!-- pointer size-->
+	<SolutionPlatformPointerSizeInBits Condition="'$(SolutionPlatformArchitecture)'=='X86' Or '$(SolutionPlatformArchitecture)'=='ARM32'">32</SolutionPlatformPointerSizeInBits>
+	<SolutionPlatformPointerSizeInBits Condition="'$(SolutionPlatformArchitecture)'=='X64' Or '$(SolutionPlatformArchitecture)'=='ARM64'">64</SolutionPlatformPointerSizeInBits>
+		
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformPointerSizeInBits)'=='32'">$(MultiPlatformSupportCommonPreprocessorDefinitions);IS_ARCHITECTURE_32_BIT</MultiPlatformSupportCommonPreprocessorDefinitions>
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformPointerSizeInBits)'=='64'">$(MultiPlatformSupportCommonPreprocessorDefinitions);IS_ARCHITECTURE_64_BIT</MultiPlatformSupportCommonPreprocessorDefinitions>
+	
+	<!-- system and architecture -->
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformSystem)'!='' And '$(SolutionPlatformABI)'!=''">$(MultiPlatformSupportCommonPreprocessorDefinitions);IS_PLATFORM_$(SolutionPlatformSystem)_$(SolutionPlatformABI)</MultiPlatformSupportCommonPreprocessorDefinitions>
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(SolutionPlatformSystem)'!='' And '$(SolutionPlatformArchitecture)'!=''">$(MultiPlatformSupportCommonPreprocessorDefinitions);IS_PLATFORM_$(SolutionPlatformSystem)_$(SolutionPlatformArchitecture)</MultiPlatformSupportCommonPreprocessorDefinitions>
+	
+	
+	<!-- disabled function specifiers -->
+	<DisabledFunctionSpecifiers Condition="'$(SolutionPlatformArchitecture)'=='ARM32' Or '$(SolutionPlatformArchitecture)'=='ARM64'">__cdecl=;__stdcall=;__thiscall=;__fastcall=</DisabledFunctionSpecifiers>
+	<MultiPlatformSupportCommonPreprocessorDefinitions>$(MultiPlatformSupportCommonPreprocessorDefinitions);$(DisabledFunctionSpecifiers)</MultiPlatformSupportCommonPreprocessorDefinitions>
+	
+	<!-- debug constants -->
+	<_DEBUG Condition="'$(Configuration)'=='Debug'">_DEBUG</_DEBUG>
+    <_DEBUG Condition="'$(Configuration)'!='Debug'"></_DEBUG>
+	
+	<NDEBUG Condition="'$(Configuration)'=='Debug'"></NDEBUG>
+    <NDEBUG Condition="'$(Configuration)'!='Debug'">NDEBUG</NDEBUG>
+	<MultiPlatformSupportCommonPreprocessorDefinitions>$(MultiPlatformSupportCommonPreprocessorDefinitions);$(_DEBUG)$(NDEBUG)</MultiPlatformSupportCommonPreprocessorDefinitions>
+	
+	<!-- configuration type -->
+	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">$(MultiPlatformSupportCommonPreprocessorDefinitions);_USRDLL</MultiPlatformSupportCommonPreprocessorDefinitions>
+	
+	<AndroidCompilerAdditionalOptions>-fexceptions -Wunused-function -Wunused-private-field -fPIC</AndroidCompilerAdditionalOptions>
+	<AndroidLinkerAdditionalOptions>-latomic</AndroidLinkerAdditionalOptions>
+	
+	
+  </PropertyGroup>
+  
+  <PropertyGroup />
+  <ItemDefinitionGroup />
+  <ItemGroup />
+</Project>

@@ -1,0 +1,41 @@
+Author: fastman92
+
+Compilers used:
+WIN_X86 - Visual Studio 2015 - Windows XP (v140_xp)
+WIN_X64 - Intel C++ Compiler 16.0
+ANDROID_ARM32 - Clang 3.8
+
+Very useful extension for Visual Studio:
+Solution Configuration Name
+https://marketplace.visualstudio.com/items?itemName=ceztko.SolutionConfigurationName-11984
+
+// Preprocessor constants that should be set up.
+
+
+// These constants will target the problem of different API
+IS_PLATFORM_WIN
+IS_PLATFORM_LINUX
+IS_PLATFORM_ANDROID
+
+// These constants will target the problem of different API and different architecture, which leads to different ASM syntax
+IS_PLATFORM_WIN_X86
+IS_PLATFORM_WIN_X64
+IS_PLATFORM_ANDROID_ARM32
+IS_PLATFORM_ANDROID_ARM64
+IS_PLATFORM_ANDROID_X86
+IS_PLATFORM_ANDROID_X64
+
+// These constants will target the problem of different ASM syntax
+IS_ARCHITECTURE_X86
+IS_ARCHITECTURE_X64
+IS_ARCHITECTURE_ARM32
+IS_ARCHITECTURE_ARM64
+
+// These constants will target the problem of different pointer size:
+IS_ARCHITECTURE_32_BIT
+IS_ARCHITECTURE_64_BIT
+
+/////////////////////////////////////////
+
+How to detect Clang?
+#ifdef 

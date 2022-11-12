@@ -1,0 +1,1 @@
+unsigned long int GTAIV_CRC32_fromString(const char* text);
