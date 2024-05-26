@@ -25,13 +25,13 @@ namespace ELF_format {
 	{
 		relInFile.r_offset.SetValue(rel.r_offset, valueEncoding);
 
-		relInFile.r_info.SetValue(ELF32_R_INFO(rel.r_index, rel.r_type, valueEncoding), valueEncoding);
+		relInFile.r_info.SetValue(ELF32_R_INFO(rel.r_index, rel.r_type), valueEncoding);
 	}
 
 	void WritePltRelocation(elf64_rel_variedEncoding& relInFile, const CRel& rel, eValueEncoding valueEncoding)
 	{
 		relInFile.r_offset.SetValue(rel.r_offset, valueEncoding);
 
-		relInFile.r_info.SetValue(ELF64_R_INFO(rel.r_index, rel.r_type, valueEncoding), valueEncoding);
+		relInFile.r_info.SetValue(ELF64_R_INFO(rel.r_index, rel.r_type), valueEncoding);
 	}
 }

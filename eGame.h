@@ -31,6 +31,7 @@ formatMacro(GAME_PLATFORM_XBOX, VALUE_ENCODING_LITTLE_ENDIAN) \
 formatMacro(GAME_PLATFORM_XBOX360, VALUE_ENCODING_BIG_ENDIAN) \
 formatMacro(GAME_PLATFORM_ANDROID_X86, VALUE_ENCODING_LITTLE_ENDIAN) \
 formatMacro(GAME_PLATFORM_ANDROID_X64, VALUE_ENCODING_LITTLE_ENDIAN) \
+formatMacro(GAME_PLATFORM_ANDROID_ARMEABI, VALUE_ENCODING_LITTLE_ENDIAN) \
 formatMacro(GAME_PLATFORM_ANDROID_ARMEABI_V7A, VALUE_ENCODING_LITTLE_ENDIAN) \
 formatMacro(GAME_PLATFORM_ANDROID_ARM64_V8A, VALUE_ENCODING_LITTLE_ENDIAN) \
 formatMacro(GAME_PLATFORM_IOS, VALUE_ENCODING_LITTLE_ENDIAN)
@@ -148,7 +149,7 @@ MAKE_GAME_EXACT_BULLY_ERA_LIST(formatMacro)
 		eGameName GetGameEnumMemberByName(const char* gameStr);
 
 		// Finds name by game enum member
-		const char* GetGameEnumNameByMember(eGameName game);
+		const char* GetPlatformEnumNameByMember(eGameName game);
 
 		// Returns true if given game belongs to GTA III era
 		bool IsGTAIIIeraGame(eGameName game);
@@ -172,7 +173,7 @@ MAKE_GAME_EXACT_BULLY_ERA_LIST(formatMacro)
 		eGameNameSimplified GetGameEnumMemberByName(const char* gameStr);
 
 		// Finds name by game enum member
-		const char* GetGameEnumNameByMember(eGameNameSimplified game);
+		const char* GetPlatformEnumNameByMember(eGameNameSimplified game);
 
 		// Returns game era
 		eGameEra GetGTAGameEra(eGameNameSimplified game);
@@ -190,7 +191,7 @@ MAKE_GAME_EXACT_BULLY_ERA_LIST(formatMacro)
 	namespace GamePlatform
 	{
 		// Finds name by platform enum member
-		const char* GetGameEnumNameByMember(eGamePlatform platform);
+		const char* GetPlatformEnumNameByMember(eGamePlatform platform);
 
 		// Returns true if platform uses big endian byte order
 		eValueEncoding IsPlatformBigEndian(eGamePlatform platform);

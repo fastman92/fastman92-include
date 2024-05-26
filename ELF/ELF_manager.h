@@ -9,6 +9,8 @@
 #include <vector>
 #include <ptr_vector.h>
 
+#define WRITE_DYNAMIC_SYMBOLS
+
 #define GET_ALIGNED_SIZE(requested_size, block_size) ((requested_size) % (block_size) == 0 ? (requested_size) : (((requested_size) / (block_size))+1)*(block_size))
 
 namespace ELF_format {
@@ -83,6 +85,9 @@ namespace ELF_format {
 
 		// Returns iterator to section by address
 		stdx::ptr_vector<CShdr>::iterator FindSectionByAddress(uint32_t address);
+
+		// Returns iterator to program header by address
+		stdx::ptr_vector<CPhdr>::iterator FindPhdrThatIncludesMemoryAddress(uint32_t address);
 
 		// Returns iterator to first section with specified type 
 		stdx::ptr_vector<CShdr>::iterator FindFirstSectionWithType(uint32_t sh_type);
@@ -167,14 +172,17 @@ namespace ELF_format {
 		// Writes ELF program segments
 		template<class phdrType, class dynType> bool WriteProgramSegmentHeaders(FILE* fp);
 
-		// Reads section headers headers
+		// Reads section headers
 		template<class T> bool ReadSectionHeaders(FILE* fp);
 
-		// Writes section headers headers
+		// Writes section headers
 		template<class T> bool WriteSectionHeaders(FILE* fp);
 
 		// Reads dynamic symbols
 		template<class T> bool ReadDynamicSymbols();
+		
+		// Returns pointer to GNU version array
+		uint16_t* GetPointerToGNUversionArray();
 
 		// Writes dynamic symbols
 		template<class T> bool WriteDynamicSymbols();

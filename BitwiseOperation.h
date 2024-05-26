@@ -87,7 +87,6 @@ namespace BitwiseOperation
 		}
 
 		return -1;
-
 	}
 
 	// Replaces bit positions

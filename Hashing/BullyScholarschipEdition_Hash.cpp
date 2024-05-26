@@ -20,6 +20,7 @@ unsigned long BullyScholarschipEdition_hash_fromUpCaseString(const char* string)
 }
 
 // Calculates BullyScholarschip Edition string from hash
+// Works for strings that have no more than 4 characters in length
 const char* BullyScholarschipEdition_stringFromHash(unsigned __int32 hash, char* outString)
 {
 	int patternLength = 131;

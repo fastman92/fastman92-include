@@ -66,7 +66,7 @@
 	<MultiPlatformSupportCommonPreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">$(MultiPlatformSupportCommonPreprocessorDefinitions);_USRDLL</MultiPlatformSupportCommonPreprocessorDefinitions>
 	
 	<AndroidCompilerAdditionalOptions>-fexceptions -Wunused-function -Wunused-private-field -fPIC</AndroidCompilerAdditionalOptions>
-	<AndroidLinkerAdditionalOptions>-latomic</AndroidLinkerAdditionalOptions>
+	<AndroidLinkerAdditionalOptions>-latomic -Wl,-Bsymbolic</AndroidLinkerAdditionalOptions>
 	
 	
   </PropertyGroup>

@@ -157,7 +157,7 @@ namespace ELF_format {
 		return true;
 	}
 
-	// Reads section headers headers
+	// Reads section headers
 	template<class T> bool CELFmanager::ReadSectionHeaders(FILE* fp)
 	{
 		fseek(fp, this->header.e_shoff, SEEK_SET);
@@ -187,7 +187,7 @@ namespace ELF_format {
 		return true;
 	}
 
-	// Writes section headers headers
+	// Writes section headers
 	template<class T> bool CELFmanager::WriteSectionHeaders(FILE* fp)
 	{
 		fseek(fp, this->header.e_shoff, SEEK_SET);
@@ -213,11 +213,13 @@ namespace ELF_format {
 			this->FindFirstEntryInDynamicTableWithTag(DT_SYMTAB)->d_un.d_ptr
 		);
 
-		void* pDynsymMemory = this->GetPointerToPartOfMemoryFromSegment(sectionDynsym->sh_addr, sectionDynsym->sh_size);
+		void* pDynsymMemory = this->GetPointerToPartOfMemoryFromSegment(sectionDynsym->sh_addr, sectionDynsym->sh_size);		
 
-		auto sectionGnuVersion = this->FindFirstSectionWithType(SHT_GNU_versym);
-		
-		uint16_t* pGnuVersionMemory = (uint16_t*)this->GetPointerToPartOfMemoryFromSegment(sectionGnuVersion->sh_addr, sectionGnuVersion->sh_size);
+		// auto sectionGnuVersion = this->FindFirstSectionWithType(SHT_GNU_versym);
+
+		// this->FindFirstEntryInDynamicTableWithTag(DT_VERSYM)->d_un.d_ptr
+
+		uint16_t* pGnuVersionMemory = GetPointerToGNUversionArray();
 		
 		unsigned int numberOfDynamicSymbols = sectionDynsym->sh_size / sectionDynsym->sh_entsize;
 		
@@ -225,13 +227,15 @@ namespace ELF_format {
 		for (unsigned int symbolID = 0; symbolID < numberOfDynamicSymbols; symbolID++)
 		{
 			CSym* symbol = new CSym();
+			symbol->gnu_version = 1;
 
 			ReadDynamicSymbol(symbol,
 				*(const T*)((char*)pDynsymMemory + symbolID * sectionDynsym->sh_entsize),
 				valueEncoding
 			);
 
-			symbol->gnu_version = pGnuVersionMemory[symbolID];
+			if(pGnuVersionMemory)
+				symbol->gnu_version = pGnuVersionMemory[symbolID];
 
 			this->dynamic_symbol_table.push_back(symbol);
 		}
@@ -239,20 +243,42 @@ namespace ELF_format {
 		return true;
 	}
 
+	// Returns pointer to GNU version array
+	uint16_t* CELFmanager::GetPointerToGNUversionArray()
+	{
+		uint16_t* pGnuVersionMemory = nullptr;
+
+		{
+			auto verSymEntry = this->FindFirstEntryInDynamicTableWithTag(DT_VERSYM);
+
+			if (verSymEntry != this->dynamic_table.end())
+			{
+
+				auto sectionGnuVersion = this->FindSectionByAddress(
+					verSymEntry->d_un.d_ptr
+				);
+
+				pGnuVersionMemory = (uint16_t*)this->GetPointerToPartOfMemoryFromSegment(sectionGnuVersion->sh_addr, sectionGnuVersion->sh_size);
+			}
+		}
+
+		return pGnuVersionMemory;
+	}
+
 	// Writes dynamic symbols
 	template<class T> bool CELFmanager::WriteDynamicSymbols()
 	{
+#ifndef WRITE_DYNAMIC_SYMBOLS
+		return true;
+#endif
+
 		auto sectionDynsym = this->FindSectionByAddress(
 			this->FindFirstEntryInDynamicTableWithTag(DT_SYMTAB)->d_un.d_ptr
 		);
 
 		void* pDynsymMemory = this->GetPointerToPartOfMemoryFromSegment(sectionDynsym->sh_addr, sectionDynsym->sh_size);
 
-		auto sectionGnuVersion = this->FindSectionByAddress(
-			this->FindFirstEntryInDynamicTableWithTag(DT_VERSYM)->d_un.d_ptr
-		);
-
-		uint16_t* pGnuVersionMemory = (uint16_t*)this->GetPointerToPartOfMemoryFromSegment(sectionGnuVersion->sh_addr, sectionGnuVersion->sh_size);
+		uint16_t* pGnuVersionMemory = GetPointerToGNUversionArray();
 		
 		unsigned int numberOfDynamicSymbols = this->dynamic_symbol_table.size();
 
@@ -266,7 +292,8 @@ namespace ELF_format {
 				valueEncoding
 			);
 
-			pGnuVersionMemory[symbolID] = symbol.gnu_version;
+			if(pGnuVersionMemory)
+				pGnuVersionMemory[symbolID] = symbol.gnu_version;
 		}
 
 		return true;
@@ -387,6 +414,9 @@ namespace ELF_format {
 	// Loads a file
 	bool CELFmanager::Load(const char* filename)
 	{
+		unsigned char Class;
+		unsigned char encodingInHeader;
+
 		FILE* fp = fopen(filename, "rb");
 
 		if (!fp)
@@ -401,7 +431,7 @@ namespace ELF_format {
 			|| this->header.e_ident[EI_MAG3] != ELFMAG3)
 			goto errorHappened;
 
-		unsigned char encodingInHeader = this->header.e_ident[EI_DATA];
+		encodingInHeader = this->header.e_ident[EI_DATA];
 
 		if (encodingInHeader == ELFDATA2LSB)
 			this->valueEncoding = VALUE_ENCODING_LITTLE_ENDIAN;
@@ -412,7 +442,7 @@ namespace ELF_format {
 
 		fseek(fp, 0, SEEK_SET);
 
-		unsigned char Class = this->header.e_ident[EI_CLASS];
+		Class = this->header.e_ident[EI_CLASS];
 
 		if (Class == ELFCLASS32)
 		{
@@ -468,7 +498,6 @@ namespace ELF_format {
 			else
 				goto errorHappened;
 		}
-
 
 		////////
 
@@ -645,15 +674,17 @@ namespace ELF_format {
 			it++)
 		{
 			if (address >= it->p_vaddr && address < it->p_vaddr + it->p_filesz)
+			{
 				if (address + size <= it->p_vaddr + it->p_filesz)
-					return &it->pFileData[address - it->p_vaddr];
+					result = &it->pFileData[address - it->p_vaddr];
 				else
 					return 0;
+			}
 
 			i++;
 		}
 
-		return 0;
+		return result;
 	}
 
 	// Returns offset to end of memory
@@ -697,6 +728,20 @@ namespace ELF_format {
 			return sizeof(Elf64_Dyn);
 		else
 			return 0;
+	}
+
+	// Returns iterator to program header by address
+	stdx::ptr_vector<CPhdr>::iterator CELFmanager::FindPhdrThatIncludesMemoryAddress(uint32_t address)
+	{
+		for (auto it = this->program_header_table.begin();
+			it != this->program_header_table.end();
+			++it)
+		{
+			if (address >= it->p_vaddr && address <= it->p_vaddr + it->p_memsz)
+				return it;
+		}
+
+		return this->program_header_table.end();
 	}
 
 	// Returns iterator to section by address
@@ -828,6 +873,8 @@ namespace ELF_format {
 
 			uint32_t symbolNameHash = elf_hash(pSymbolName);
 			unsigned int bucketID = symbolNameHash % pHashTable->nbucket;
+
+			// printf("symbolName: %s bucketID: %d\n", pSymbolName, bucketID);
 
 			if (bucketLastWrittenPositionInChain[bucketID])	// already chain created?
 			{

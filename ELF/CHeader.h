@@ -1,5 +1,8 @@
 #pragma once
 #include <stdint.h>
+#include <string.h>
+
+#include "elf.h"
 
 #pragma warning(disable:4244)
 

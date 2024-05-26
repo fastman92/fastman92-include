@@ -73,16 +73,49 @@ namespace Game_GTASA
 	class CPathNode
 	{
 	public:
-		CPathNode *m_pPrev;
-		CPathNode **m_ppNext;
-		CompressedVector m_posn;	// unused when fastman92 path format VER2 or higher is used
-		int16_t m_wSearchList;
-		int16_t m_wConnectedNodesStartId;	// ID into link array
-		CNodeAddress m_nodeInfo;
+		enum {
+			SPECIAL_NONE = 0x0,
+			SPECIAL_PARKING_PARALLEL = 0x1,
+			SPECIAL_PARKING_PERPENDICULAR = 0x2,
+			SPECIAL_VALET = 0x3,
+			SPECIAL_NIGHTCLUB = 0x4,
+			SPECIAL_DELIVERIES = 0x5,
+			SPECIAL_VALET_UNLOAD = 0x6,
+			SPECIAL_NIGHTCLUB_UNLOAD = 0x7,
+			SPECIAL_DRIVE_THROUGH = 0x8,
+			SPECIAL_DRIVE_THROUGH_WINDOW = 0x9,
+			SPECIAL_DELIVERIES_UNLOAD = 0xA
+		};
 
-		char m_nPathWidth;
-		uint8_t m_nFloodID;		// unused when fastman92 path format VER3 or higher is used
-		uint32_t m_dwFlags;
+		CPathNode *pNext;
+		CPathNode *pPrevious;
+		CompressedVector Coors;	// unused when fastman92 path format VER2 or higher is used
+		int16_t DistanceToTarget;
+		int16_t IndexAdjacentNodes;	// ID into link array
+		CNodeAddress Address;
+
+		uint8_t Width;
+		uint8_t Group;		// unused when fastman92 path format VER3 or higher is used
+
+		union
+		{
+			uint32_t m_dwFlags;
+			struct {
+				uint8_t NumberAdjNodes : 4;	// + 0
+				uint8_t OnDeadEnd : 1;	// + 4
+				uint8_t SwitchedOff : 1;	// + 5
+				uint8_t RoadBlock : 1;	// + 6
+				uint8_t WaterNode : 1;	// + 7
+				uint8_t SwitchedOffOriginal : 1;	// + 8
+				uint8_t AlreadyFound : 1;	// + 9
+				uint8_t DontWanderHere : 1;	// + 10
+				uint8_t InteriorNode : 1;	// + 11
+				uint8_t Speed : 2; // + 12
+				uint8_t Dummy : 2;	// + 14
+				uint8_t Density : 4;	// + 16
+				uint8_t SpecialFunction : 4;	// + 20
+			};
+		};
 
 		// Returns number of links
 		int GetNumberOfLinks() { return this -> m_dwFlags & 0xF; }
@@ -90,39 +123,77 @@ namespace Game_GTASA
 		// Sets the position in vector
 		void GetPosition(CVector& out)
 		{
-			out.x = (float)this->m_posn.x / PATH_COORD_MULTIPLIER;
-			out.y = (float)this->m_posn.y / PATH_COORD_MULTIPLIER;
-			out.z = (float)this->m_posn.z / PATH_COORD_MULTIPLIER;
+			out.x = (float)this->Coors.x / PATH_COORD_MULTIPLIER;
+			out.y = (float)this->Coors.y / PATH_COORD_MULTIPLIER;
+			out.z = (float)this->Coors.z / PATH_COORD_MULTIPLIER;
 		}
 	};
 
 	VALIDATE_SIZE_ONLY_ON_32_BIT_ARCHITECTURE(CPathNode, 0x1C);
 
+	// standard GTA SA
+	class CPathNodeSerialize
+	{
+	public:
+		uint32_t pNext;	// fakePtr
+		uint32_t pPrevious;	// fakePtr
+		CompressedVector Coors;	// unused when fastman92 path format VER2 or higher is used
+		int16_t DistanceToTarget;
+		int16_t IndexAdjacentNodes;	// ID into link array
+		CNodeAddress Address;
+
+		uint8_t Width;
+		uint8_t Group;		// unused when fastman92 path format VER3 or higher is used
+
+		union
+		{
+			uint32_t m_dwFlags;
+		};
+	};
+
+	VALIDATE_SIZE(CPathNodeSerialize, 0x1C);
+	
 	// fastman92 path format VER2
 	class CPathNode_fastman92_version_2 : public CPathNode
 	{
 	public:
-		CompressedVector_extended m_extended_posn;
+		CompressedVector_extended CoorsExtended;
 
 		// Sets the position in vector
 		void GetPosition(CVector& out)
 		{
-			out.x = (float)this->m_extended_posn.x / PATH_COORD_MULTIPLIER;
-			out.y = (float)this->m_extended_posn.y / PATH_COORD_MULTIPLIER;
-			out.z = (float)this -> m_extended_posn.z / PATH_COORD_MULTIPLIER;
+			out.x = (float)this->CoorsExtended.x / PATH_COORD_MULTIPLIER;
+			out.y = (float)this->CoorsExtended.y / PATH_COORD_MULTIPLIER;
+			out.z = (float)this ->CoorsExtended.z / PATH_COORD_MULTIPLIER;
 		}
 	};
 
 	VALIDATE_SIZE_ONLY_ON_32_BIT_ARCHITECTURE(CPathNode_fastman92_version_2, 0x28);
 
+	class CPathNode_fastman92_version_2_Serialize : public CPathNodeSerialize
+	{
+	public:
+		CompressedVector_extended CoorsExtended;
+	};
+
+	VALIDATE_SIZE(CPathNode_fastman92_version_2_Serialize, 0x28);
+
 	// fastman92 path format VER4
 	class CPathNode_fastman92_version_4 : public CPathNode_fastman92_version_2
 	{
 	public:
-		uint16_t m_nExFloodID;
+		uint16_t GroupExtended;
 	};
 
 	VALIDATE_SIZE_ONLY_ON_32_BIT_ARCHITECTURE(CPathNode_fastman92_version_4, 0x2C);
+
+	class CPathNode_fastman92_version_4_Serialize : public CPathNode_fastman92_version_2_Serialize
+	{
+	public:
+		uint16_t GroupExtended;
+	};
+
+	VALIDATE_SIZE(CPathNode_fastman92_version_4_Serialize, 0x2C);
 
 	class CCarPathLink
 	{
@@ -131,7 +202,7 @@ namespace Game_GTASA
 		{
 			int16_t x;
 			int16_t y;
-		} pos;	// unused when path limit hacked
+		} Coors;	// unused when path limit hacked
 		CNodeAddress attachedPathNode;
 		int8_t dirX;
 		int8_t dirY;
@@ -147,7 +218,7 @@ namespace Game_GTASA
 		struct {
 			int32_t x;
 			int32_t y;
-		} extended_pos;
+		} CoorsExtended;
 	};
 
 	VALIDATE_SIZE(CCarPathLink_fastman92_version_4, 0x18);
@@ -222,14 +293,14 @@ namespace Game_GTASA
 	// fastman92 path format VER3
 	// comes with alignment problem, version 4 fixes it
 	#pragma pack(push, 1)
-	class CPathNode_fastman92_version_3 : public CPathNode_fastman92_version_2
+	class CPathNode_fastman92_version_3_Serialize : public CPathNode_fastman92_version_2_Serialize
 	{
 	public:
-		uint16_t m_nExFloodID;
+		uint16_t GroupExtended;
 	};
 	#pragma pack(pop)
 
-	VALIDATE_SIZE_ONLY_ON_32_BIT_ARCHITECTURE(CPathNode_fastman92_version_3, 0x2A);
+	VALIDATE_SIZE(CPathNode_fastman92_version_3_Serialize, 0x2A);
 
 	// comes with alignment problem, version 4 fixes it
 	#pragma pack(push, 1)
@@ -239,7 +310,7 @@ namespace Game_GTASA
 		struct {
 			int32_t x;
 			int32_t y;
-		} extended_pos;
+		} CoorsExtended;
 	};
 	#pragma pack(pop)
 

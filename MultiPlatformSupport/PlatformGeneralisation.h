@@ -86,3 +86,9 @@
 #define PRINTF_POINTER_HEX_STR_PAD "%08X"
 #define PRINTF_POINTER_HEX_STR "%X"
 #endif
+
+#if defined(WIN32) || defined(_WIN32) 
+#define PATH_SEPARATOR "\\" 
+#else 
+#define PATH_SEPARATOR "/" 
+#endif 

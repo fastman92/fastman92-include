@@ -3,14 +3,27 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-f92_runtime_error::f92_runtime_error(const char *format, ...)
+void f92_runtime_error::vsprintf(const char* format, va_list args)
 {
 	char buffer[8192];
 
-	va_list args;
-	va_start(args, format);
 	vsnprintf(buffer, sizeof(buffer), format, args);
-	va_end(args);
 
 	this->msg = buffer;
+}
+
+f92_runtime_error::f92_runtime_error(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	this->vsprintf(format, args);
+	va_end(args);
+}
+
+f92_runtime_error_not_critical::f92_runtime_error_not_critical(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	this->vsprintf(format, args);
+	va_end(args);
 }

@@ -41,7 +41,7 @@ namespace Game {
 		}
 
 		// Finds name by game enum member
-		const char* GetGameEnumNameByMember(eGameName game)
+		const char* GetPlatformEnumNameByMember(eGameName game)
 		{
 			return getNameByEnumMemberFromArray(GameEnumMemberNames, game);
 		}
@@ -101,7 +101,7 @@ namespace Game {
 		}
 
 		// Finds name by game enum member
-		const char* GetGameEnumNameByMember(eGameNameSimplified game)
+		const char* GetPlatformEnumNameByMember(eGameNameSimplified game)
 		{
 			return getNameByEnumMemberFromArray(GameEnumMemberNames, game);
 		}
@@ -156,7 +156,7 @@ namespace Game {
 		};
 
 		// Finds name by platform enum member
-		const char* GetGameEnumNameByMember(eGamePlatform platform)
+		const char* GetPlatformEnumNameByMember(eGamePlatform platform)
 		{
 			return getNameByEnumMemberFromArray(PlatformEnumMemberNames, platform);
 		}
