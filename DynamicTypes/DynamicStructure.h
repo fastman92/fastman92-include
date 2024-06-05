@@ -171,12 +171,12 @@ public:
 	// Size of type
 	template<class T> static size_t SizeOf()
 	{
-		return details::TypeDetails<T>::SizeOf();
+		return ::details::TypeDetails<T>::SizeOf();
 	}
 
 	template<class T> static size_t SizeOf(T& object)
 	{
-		return details::TypeDetails<T>::SizeOf();
+		return ::details::TypeDetails<T>::SizeOf();
 	}
 
 	// for types, which derive from CDynamicStructMemberBase, an array of unknown size
@@ -187,18 +187,18 @@ public:
 		static typename std::enable_if<std::is_base_of<CDynamicStructMemberBase, Tmember<DynamicStructure, T[]>>::value, size_t>::type
 		SizeOf(Tmember<DynamicStructure, T[]>& member)
 	{
-		return member.countOfElementsAllocated * details::TypeDetails<T>::SizeOf();
+		return member.countOfElementsAllocated * ::details::TypeDetails<T>::SizeOf();
 	};
 
 	// Alignment of type
 	template<class T> static size_t Alignment()
 	{
-		return details::TypeDetails<T>::Alignment();
+		return ::details::TypeDetails<T>::Alignment();
 	}
 
 	template<class T> static size_t Alignment(T& object)
 	{
-		return details::TypeDetails<T>::Alignment();
+		return ::details::TypeDetails<T>::Alignment();
 	}
 };
 
@@ -524,7 +524,7 @@ namespace details
 
 // Struct member array, unknown size
 template<class DynamicStructure, typename T> class CDynamicStructMember<DynamicStructure, T[]>
-	: public details::CDynamicStructMemberArray<DynamicStructure, T[]>
+	: public ::details::CDynamicStructMemberArray<DynamicStructure, T[]>
 {
 public:
 	unsigned int countOfElementsAllocated;
@@ -545,7 +545,7 @@ public:
 
 // Struct member array, known size
 template<class DynamicStructure, typename T, int N> class CDynamicStructMember<DynamicStructure, T[N]>
-	: public details::CDynamicStructMemberArray<DynamicStructure, T[N]>
+	: public ::details::CDynamicStructMemberArray<DynamicStructure, T[N]>
 {};
 
 // Struct member tDynamicStructSize
